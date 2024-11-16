@@ -1,0 +1,56 @@
+class SegTree {
+    int[] seg;
+
+    // Constructor to initialize the segment tree array
+    SegTree(int n) {
+        seg = new int[4 * n];
+    }
+
+    // O(n) - Build the segment tree
+    void construct(int arr[], int ss, int se, int ind) {
+        if (ss > se) return;
+        if (ss == se) {
+            seg[ind] = arr[ss];
+            return;
+        }
+        int mid = (ss + se) / 2;
+        construct(arr, ss, mid, 2 * ind + 1);
+        construct(arr, mid + 1, se, 2 * ind + 2);
+        seg[ind] = seg[2 * ind + 1] + seg[2 * ind + 2];
+    }
+
+    // O(log n) - Query the sum in range [l, r]
+    int getSum(int ss, int se, int ind, int l, int r) {
+        if (r < ss || se < l) return 0; // No overlap
+        if (l <= ss && se <= r) return seg[ind]; // Complete overlap
+        int mid = (ss + se) / 2;
+        // Partial overlap
+        return getSum(ss, mid, 2 * ind + 1, l, r) + getSum(mid + 1, se, 2 * ind + 2, l, r);
+    }
+
+    // O(log n) - Update a single point
+    void pointUpdate(int ss, int se, int ind, int i, int value) {
+        if (i < ss || se < i) return; // Out of bounds
+        if (ss == se) {
+            seg[ind] = value; // Update the value at the leaf node
+            return;
+        }
+        int mid = (ss + se) / 2;
+        pointUpdate(ss, mid, 2 * ind + 1, i, value); // Update left child
+        pointUpdate(mid + 1, se, 2 * ind + 2, i, value); // Update right child
+        seg[ind] = seg[2 * ind + 1] + seg[2 * ind + 2]; // Update the current node
+    }
+
+    // O(log n) - Range update with increment
+    void rangeUpdate(int ss, int se, int ind, int l, int r, int inc) {
+        if (r < ss || se < l) return; // No overlap
+        if (ss == se) {
+            seg[ind] += inc; // Update leaf node directly
+            return;
+        }
+        int mid = (ss + se) / 2;
+        rangeUpdate(ss, mid, 2 * ind + 1, l, r, inc); // Update left child
+        rangeUpdate(mid + 1, se, 2 * ind + 2, l, r, inc); // Update right child
+        seg[ind] = seg[2 * ind + 1] + seg[2 * ind + 2]; // Update the current node
+    }
+}
